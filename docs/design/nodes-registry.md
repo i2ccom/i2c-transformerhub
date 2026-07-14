@@ -1,130 +1,174 @@
 # TransformerHub Nodes Registry
 
-## Scope
+## Purpose
 
-This document lists all currently available nodes from the shared runtime package and summarizes practical usage for each one.
+This document is the canonical node catalog for TransformerHub. It is written for both product readers and implementers and explains what each node type does, which payload shape it expects, and when it is the right choice.
 
 Source of truth:
 
-- th-shared/src/nodes/dataSourceNodes.ts
-- th-shared/src/nodes/actionNodes.ts
-- th-shared/src/nodes/sinkNodes.ts
+- [th-shared/src/nodes/dataSourceNodes.ts](../../th-shared/src/nodes/dataSourceNodes.ts)
+- [th-shared/src/nodes/actionNodes.ts](../../th-shared/src/nodes/actionNodes.ts)
+- [th-shared/src/nodes/sinkNodes.ts](../../th-shared/src/nodes/sinkNodes.ts)
 
-Total nodes currently listed: 51
+## Type Model
 
-- Data Source nodes: 14
-- Action nodes: 29
-- Sink nodes: 8
+TransformerHub node types fall into three runtime categories:
+
+- Source nodes start a flow by reading from files, APIs, messages, or databases.
+- Action nodes transform, validate, enrich, branch, or orchestrate data.
+- Sink nodes end a branch by delivering, storing, or displaying output.
+
+The web editor uses this metadata to generate node UI:
+
+- `inputs` and `outputs` define connector handles.
+- `properties` or `jsonSchema` define configuration fields.
+- `category` controls where the node appears in the palette.
+- `group` helps organize nodes by domain or capability.
+
+## Configuration Conventions
+
+- string: freeform text or identifier values.
+- number / integer: numeric settings such as limits, counts, or thresholds.
+- boolean: enable/disable switches.
+- object: structured nested settings, often shown as JSON.
+- array: repeatable lists such as headers, tags, or rules.
+- enum: finite selection rendered as a dropdown.
+- format: special handling for values like email, uri, date, or json.
 
 ## Data Source Nodes
 
-These nodes ingest data into a flow.
+These nodes ingest external or file-based data into a flow.
 
-| Node | Typical Usage |
-| --- | --- |
-| JSONFileNode | Load structured JSON payloads from file-based inputs. |
-| XMLFileNode | Ingest XML documents for downstream conversion or mapping. |
-| CSVFileNode | Read tabular CSV records for validation and transformation. |
-| VideoFileNode | Start media pipelines from local or mounted video files. |
-| AudioFileNode | Start audio pipelines from audio file content. |
-| ImageFileNode | Ingest images for processing, tagging, or transformation steps. |
-| SQLDatabaseNode | Read records from relational databases through SQL queries. |
-| NoSQLDatabaseNode | Read documents from document or key-value data stores. |
-| RESTAPINode | Pull remote data over HTTP REST endpoints. |
-| GraphQLAPINode | Query remote GraphQL services for targeted data selection. |
-| WebSocketNode | Stream real-time messages/events into the flow. |
-| FormDataNode | Ingest user-submitted form fields and files. |
-| RSSFeedNode | Poll RSS feeds and transform feed items. |
-| EmailSourceNode | Ingest incoming email content and metadata. |
+| Node | Runtime Role | Inputs | Outputs | Typical Config | Best Used For |
+| --- | --- | --- | --- | --- | --- |
+| JSONFileNode | Read JSON payloads from file or mounted content. | None | `output` | `filePath`, `schema`, parse options | Structured file ingestion, config import, content payloads. |
+| XMLFileNode | Read XML documents. | None | `output` | `filePath`, parse mode, namespace options | Interchange formats, legacy system payloads. |
+| CSVFileNode | Parse tabular CSV records. | None | `output` | `filePath`, `delimiter`, header handling | Spreadsheet data, ETL staging, exports. |
+| VideoFileNode | Load video media as a source payload. | None | `output` | `filePath`, codec hints, metadata extraction | Media pipelines and video transformations. |
+| AudioFileNode | Load audio media as a source payload. | None | `output` | `filePath`, sample rate, channel settings | Speech, music, and transcription flows. |
+| ImageFileNode | Load image assets into the flow. | None | `output` | `filePath`, size metadata, image format | Image processing, tagging, and generation pipelines. |
+| SQLDatabaseNode | Query relational data. | None | `output` | connection string, query text, paging options | Warehouse reads, reporting, operational extracts. |
+| NoSQLDatabaseNode | Query document or key-value stores. | None | `output` | connection config, collection, query filter | Flexible document data and event snapshot reads. |
+| RESTAPINode | Fetch data from REST endpoints. | None | `output` | URL, headers, auth, method, retries | SaaS/API integration and enrichment. |
+| GraphQLAPINode | Query GraphQL services. | None | `output` | endpoint, query, variables, auth | Precise API reads with schema-aware selection. |
+| WebSocketNode | Subscribe to real-time messages. | None | `output` | endpoint, reconnect rules, event filters | Streaming updates, event feeds, live control data. |
+| FormDataNode | Accept form submissions as input. | None | `output` | field definitions, validation, file handling | Human input capture and lightweight workflow triggers. |
+| RSSFeedNode | Poll and parse RSS/Atom feeds. | None | `output` | feed URL, polling interval, dedupe settings | Content aggregation and change monitoring. |
+| EmailSourceNode | Ingest incoming email messages. | None | `output` | mailbox settings, filters, attachment handling | Support inboxes, ticket intake, operational triggers. |
+
+### Source Node Selection Guidance
+
+- Use file sources when the upstream system exports a stable artifact.
+- Use API sources when freshness matters more than batch efficiency.
+- Use database sources when you need reliable query semantics and paging.
+- Use streaming sources when events must be processed with low latency.
 
 ## Action Nodes
 
-These nodes transform, enrich, branch, validate, or orchestrate work between input and output stages.
+These nodes perform transformation, validation, AI operations, control flow, or orchestration.
 
-| Node | Typical Usage |
-| --- | --- |
-| JSONValidatorNode | Validate JSON payloads against structural constraints or schema-like rules. |
-| CustomScriptNode | Execute custom transformation logic when built-in nodes are insufficient. |
-| AICommand | Run command-style AI operations on prompt-driven tasks. |
-| AITextTransform | Rewrite, summarize, classify, or normalize text content. |
-| AIImageGen | Generate images from prompts or conditioning metadata. |
-| AIVideoGen | Generate or synthesize short video outputs from prompt/context input. |
-| AudioTranscribe | Convert speech/audio streams into text for downstream processing. |
-| AudioNoiseReduction | Clean noisy audio before transcription or mixing. |
-| AudioMix | Combine multiple audio tracks into a mixed output. |
-| VideoCompose | Assemble multiple clips/assets into a composed timeline. |
-| YouTubeUploader | Upload completed video assets to YouTube workflows. |
-| XMLTransformer | Convert or reshape XML documents between schemas/formats. |
-| VideoTranscoder | Convert video codecs, bitrates, or output formats. |
-| TextAnalyzer | Extract sentiment, keywords, entities, or textual metadata. |
-| TemplateRenderer | Render output text/documents from template + data context. |
-| Scheduler | Trigger or gate actions based on scheduling/time rules. |
-| NotificationSender | Send generic notifications to configured channels. |
-| MLPredictor | Perform prediction/inference with configured ML model settings. |
-| ImageProcessor | Resize/filter/transform image content in media pipelines. |
-| HTTPRequest | Call external HTTP services for enrichment or side effects. |
-| FileWriter | Persist transformed payloads to file destinations. |
-| EmailSender | Send outbound email messages from flow results. |
-| DataValidator | Validate non-JSON payload quality/business constraints. |
-| DataMapper | Map fields from one schema/shape into another. |
-| DataJoiner | Join data sets from multiple branches/sources. |
-| DataFilter | Keep or remove records by rule expressions. |
-| DatabaseWriter | Persist flow outputs into database targets. |
-| DataAggregator | Group/roll up records into summary metrics. |
-| ConditionalBranch | Route processing path based on condition evaluation. |
+| Node | Runtime Role | Inputs | Outputs | Typical Config | Best Used For |
+| --- | --- | --- | --- | --- | --- |
+| JSONValidatorNode | Validate payload structure and required fields. | `data` | `output` or error | schema rules, required paths, strict mode | Early guardrails before expensive actions. |
+| CustomScriptNode | Execute arbitrary custom logic. | `data` | `output` | script body, language, sandbox settings | One-off business rules and bridge logic. |
+| AICommand | Execute prompt-driven AI commands. | `data` | `output` | prompt, model settings, temperature | AI-controlled routing and task execution. |
+| AITextTransform | Rewrite, summarize, classify, or normalize text. | `data` | `output` | prompt, tone, language, output style | Content operations, support automation, enrichment. |
+| AIImageGen | Generate images from text/context. | `data` | `output` | prompt, style, size, seed | Creative generation and AI media workflows. |
+| AIVideoGen | Generate or synthesize video outputs. | `data` | `output` | prompt, duration, format, style | Storyboard-to-video and generative media. |
+| AudioTranscribe | Convert audio to text. | `data` | `output` | language, diarization, timestamps | Speech notes, meeting capture, support analysis. |
+| AudioNoiseReduction | Reduce noise on audio streams. | `data` | `output` | reduction level, profile, preserve speech | Prepare audio for transcription or publishing. |
+| AudioMix | Merge and balance multiple audio tracks. | `data` | `output` | gain, normalization, track rules | Podcasts, voice plus music, multitrack edits. |
+| VideoCompose | Assemble multiple video assets. | `data` | `output` | composition template, transitions, overlays | Marketing clips, batch video assembly. |
+| YouTubeUploader | Publish finished video to YouTube. | `data` | `output` | credentials, title, privacy, category | Direct publishing after composition. |
+| XMLTransformer | Convert XML to another structure or schema. | `data` | `output` | source schema, target schema, mapping rules | Legacy integration and format migration. |
+| VideoTranscoder | Re-encode media formats. | `data` | `output` | codec, resolution, bitrate, preset | Delivery-ready media transformation. |
+| TextAnalyzer | Analyze text for insight or metadata. | `data` | `output` | sentiment, entities, keyword extraction | Triage, classification, search enrichment. |
+| TemplateRenderer | Render templates with data context. | `data` | `output` | template string, variables, escaping rules | Documents, emails, and notifications. |
+| Scheduler | Trigger time-based work. | `data` or none | `output` | cron/rule config, timezone, recurrence | Delayed actions and periodic jobs. |
+| NotificationSender | Send notifications to configured channels. | `data` | `output` | channel, recipients, priority | Cross-channel alerts and workflow completion notices. |
+| MLPredictor | Run inference against a model. | `data` | `output` | model name, features, threshold | Classification and prediction pipelines. |
+| ImageProcessor | Manipulate image content. | `data` | `output` | resize, crop, filter, format | Media conversion and visual preprocessing. |
+| HTTPRequest | Call outbound HTTP services. | `data` | `output` | URL, method, headers, retries | Webhooks, service calls, enrichment steps. |
+| FileWriter | Write data to a file target. | `data` | `output` | file path, encoding, overwrite mode | Export, archiving, and report generation. |
+| EmailSender | Send outbound email. | `data` | `output` | SMTP/service config, subject, recipients | Notifications, alerts, generated reports. |
+| DataValidator | Validate business rules and payload quality. | `data` | `output` | rules, thresholds, fail-fast | Quality gates before persistence. |
+| DataMapper | Reshape objects from one contract into another. | `data` | `output` | field mapping, defaults, cast rules | Core ETL and integration mapping. |
+| DataJoiner | Combine multiple upstream records. | multiple `data` | `output` | join key, strategy, dedupe | Aggregating branch outputs or reference data. |
+| DataFilter | Include or exclude items by rule. | `data` | `output` | condition language, keep/drop semantics | Routing, trimming, and normalization. |
+| DatabaseWriter | Persist results to a database. | `data` | `output` | connection, table/collection, upsert mode | Final write-back to operational systems. |
+| DataAggregator | Group and summarize records. | `data` | `output` | group keys, metrics, windows | Rollups, reporting, and analytics prep. |
+| ConditionalBranch | Route the flow by condition. | `data` | multiple outputs | expressions, branch labels, default path | Complex decision trees and routing logic. |
+
+### Action Node Families
+
+- Validation: JSONValidatorNode, DataValidator.
+- Mapping and shaping: DataMapper, XMLTransformer, TemplateRenderer.
+- AI: AICommand, AITextTransform, AIImageGen, AIVideoGen, MLPredictor.
+- Media: AudioTranscribe, AudioNoiseReduction, AudioMix, VideoCompose, VideoTranscoder, ImageProcessor.
+- Orchestration: Scheduler, ConditionalBranch, NotificationSender, HTTPRequest.
+- Persistence/output: FileWriter, EmailSender, DatabaseWriter, YouTubeUploader.
 
 ## Sink Nodes
 
-These nodes represent terminal outputs or delivery endpoints.
+These nodes finish a branch by delivering or displaying output.
 
-| Node | Typical Usage |
-| --- | --- |
-| OutputLogNode | Write final output to logs/console sinks for inspection. |
-| SendEmailNode | Deliver terminal results via email channel. |
-| SendPushNotificationNode | Send push/mobile/app notifications as final actions. |
-| MediaViewerNode | Present generated media for review or QA display. |
-| UploadToYoutubeNode | Publish final video artifacts to YouTube. |
-| UploadGGDriveNode | Upload files/media outputs to Google Drive. |
-| UploadS3Node | Push artifacts to Amazon S3 buckets. |
-| UploadFTPNode | Transfer output files to FTP servers. |
+| Node | Runtime Role | Inputs | Outputs | Typical Config | Best Used For |
+| --- | --- | --- | --- | --- | --- |
+| OutputLogNode | Emit final output to logs or console. | `data` | None | log level, formatting, sampling | Debugging, observability, QA. |
+| SendEmailNode | Terminal email delivery. | `data` | None | subject, recipients, template | Notifications and reports. |
+| SendPushNotificationNode | Terminal push notification delivery. | `data` | None | channel, recipients, urgency | User alerts and mobile operations. |
+| MediaViewerNode | Preview media at the end of a flow. | `data` | None | display mode, metadata, autoplay | Human review and approval. |
+| UploadToYoutubeNode | Publish media to YouTube. | `data` | None | account, title, visibility | Media publishing and distribution. |
+| UploadGGDriveNode | Upload artifacts to Google Drive. | `data` | None | folder, permissions, naming | Team handoff and storage. |
+| UploadS3Node | Upload artifacts to S3. | `data` | None | bucket, prefix, access control | Durable object storage. |
+| UploadFTPNode | Transfer files to an FTP endpoint. | `data` | None | host, path, credentials | Legacy delivery endpoints. |
 
-## Usage Patterns
+### Sink Node Guidance
 
-### Pattern A: File ETL
+- Use a sink node only at the end of a branch.
+- Prefer a sink that matches the delivery contract of the target system.
+- Use log/view sinks during development and QA.
+
+## Common Usage Patterns
+
+### File ETL
 
 1. CSVFileNode
 2. DataMapper
 3. DataValidator
 4. DatabaseWriter or FileWriter
 
-### Pattern B: API Enrichment
+### API Enrichment
 
 1. RESTAPINode
-2. DataJoiner (with local source)
+2. DataJoiner
 3. DataFilter
-4. NotificationSender
+4. NotificationSender or EmailSender
 
-### Pattern C: Media Pipeline
+### Media Pipeline
 
 1. VideoFileNode or AudioFileNode
 2. VideoTranscoder or AudioNoiseReduction
 3. VideoCompose or AudioMix
 4. UploadS3Node or UploadToYoutubeNode
 
-### Pattern D: AI Content Flow
+### AI Content Flow
 
 1. JSONFileNode or FormDataNode
 2. AITextTransform or AIImageGen
 3. TemplateRenderer
 4. SendEmailNode or OutputLogNode
 
-## Node Selection Guidance
+## Dynamic Schema Usage
 
-- Prefer DataMapper + DataValidator before external writes.
-- Use ConditionalBranch when one input can lead to multiple business paths.
-- Use sink nodes only at the end of execution branches.
-- Keep CustomScriptNode as a last-resort extension point when native nodes cannot represent the rule.
+TransformerHub can turn node schemas into UI controls directly.
 
-## Maintenance Note
+- Start with `jsonSchema` when available.
+- Fall back to legacy `properties` metadata when schema is missing.
+- Use enums for strict dropdowns.
+- Use object/array fields for nested configuration.
+- Favor schema-driven node definition updates when adding new nodes.
 
-When adding or removing nodes in th-shared/src/nodes, update this file in the same change set to keep product docs consistent with runtime capabilities.
+## Maintenance Rule
+
+If a node is added, renamed, removed, or changes configuration shape in `th-shared`, update this registry in the same change set.

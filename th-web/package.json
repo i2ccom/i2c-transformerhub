@@ -23,14 +23,16 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",
+    "jsdom": "^25.0.1",
     "typescript": "^4.9.5",
     "vite": "^4.0.0",
+    "vitest": "^3.0.9",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
     "start": "vite",
     "build": "vite build",
-    "test": "vitest",
+    "test": "vitest run",
     "eject": "echo 'Eject is not supported with Vite.' && exit 1"
   },
   "eslintConfig": {
