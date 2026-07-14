@@ -7,6 +7,7 @@ interface Node {
   id: string;
   alias?: string;
   type: string;
+  category?: string;
   status: string | ((arg: string) => void);
   error?: string | null;
   output?: any;
@@ -53,6 +54,7 @@ interface NodeDefinition {
   id: string;
   alias: string;
   type: string;
+  category?: string;
   position: {
     x: number;
     y: number;

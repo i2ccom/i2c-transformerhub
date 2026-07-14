@@ -39,12 +39,14 @@ export interface ConnectionDefinition {
 
 export interface NodeTypeDefinition {
   type: string;
-  category: 'source' | 'action';
+  category: 'source' | 'action' | 'sink';
+  group: string;
   name: string;
   description: string;
   inputs: string[];
   outputs: string[];
   properties?: Record<string, PropertyDefinition>;
+  jsonSchema?: JsonSchemaDefinition;
   icon?: string;
   isFavorite?: boolean;
 }
@@ -54,6 +56,18 @@ export interface PropertyDefinition {
   default: any;
   required: boolean;
   options?: any[];
+}
+
+export interface JsonSchemaDefinition {
+  type?: string | string[];
+  title?: string;
+  description?: string;
+  default?: any;
+  enum?: any[];
+  format?: string;
+  items?: JsonSchemaDefinition;
+  properties?: Record<string, JsonSchemaDefinition>;
+  required?: string[];
 }
 
 export interface ExecutionResult {

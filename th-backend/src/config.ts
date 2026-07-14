@@ -29,7 +29,7 @@ const config: Config = {
   },
   database: {
     useMongoose: true,
-    uri: 'mongodb://localhost:27017/mydb',
+    uri: 'mongodb://localhost:27017/thdb',
     options: {},
   },
   auth: {

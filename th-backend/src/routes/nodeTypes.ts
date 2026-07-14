@@ -13,7 +13,18 @@ interface NodeType {
   inputs: string[];
   outputs: string[];
   properties?: Record<string, any>;
+  jsonSchema?: JsonSchema;
   icon?: string;
+}
+
+interface JsonSchema {
+  type: 'object';
+  properties: Record<string, {
+    type: string;
+    default?: any;
+    enum?: any[];
+  }>;
+  required?: string[];
 }
 
 interface NodeTypeInfo extends NodeType {
@@ -34,9 +45,11 @@ router.get('/:type', (req: Request, res: Response) => {
   const allNodeTypes = getAllNodeTypes();
   for (const nodeType of allNodeTypes) {
     if (nodeType.type === type) {
+      const properties = getPropertiesForNodeType(nodeType.instance);
       nodeInfo = {
         ...nodeType,
-        properties: getPropertiesForNodeType(nodeType.instance),
+        properties,
+        jsonSchema: buildJsonSchemaFromProperties(properties),
         // icon: instance.icon || null,
       };
       break;
@@ -132,6 +145,44 @@ function getPropertiesForNodeType(instance: any): Record<string, any> {
   }
 
   return properties;
+}
+
+function buildJsonSchemaFromProperties(properties: Record<string, any>): JsonSchema {
+  const schema: JsonSchema = {
+    type: 'object',
+    properties: {},
+    required: [],
+  };
+
+  for (const [key, definition] of Object.entries(properties)) {
+    const propertySchema: {
+      type: string;
+      default?: any;
+      enum?: any[];
+    } = {
+      type: definition.type || 'string',
+    };
+
+    if (definition.default !== undefined) {
+      propertySchema.default = definition.default;
+    }
+
+    if (Array.isArray(definition.options) && definition.options.length > 0) {
+      propertySchema.enum = definition.options;
+    }
+
+    schema.properties[key] = propertySchema;
+
+    if (definition.required) {
+      schema.required?.push(key);
+    }
+  }
+
+  if (schema.required && schema.required.length === 0) {
+    delete schema.required;
+  }
+
+  return schema;
 }
 
 export default router;

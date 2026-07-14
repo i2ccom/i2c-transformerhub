@@ -294,10 +294,20 @@ const FlowEditor: React.FC<FlowEditorProps> = ({ flowId }) => {
   // Handle node property updates
   const updateNodeProperties = useCallback(
     (nodeId: string, properties: Record<string, any>) => {
+      const nextAlias = typeof properties.alias === "string" ? properties.alias : undefined;
+      const { alias: _alias, ...nextProperties } = properties;
+
       setNodes((nodes) =>
         nodes.map((node) =>
           node.id === nodeId
-            ? { ...node, data: { ...node.data, properties } }
+            ? {
+                ...node,
+                data: {
+                  ...node.data,
+                  alias: nextAlias ?? node.data.alias,
+                  properties: nextProperties,
+                },
+              }
             : node
         )
       );

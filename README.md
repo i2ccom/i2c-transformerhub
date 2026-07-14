@@ -1,197 +1,113 @@
 # TransformerHub
 
-TransformerHub is an event-driven integration system prototype that provides a visual dataflow editor for creating, configuring, and executing data transformation workflows without writing code.
+TransformerHub is a TypeScript monorepo for building and running visual, node-based data transformation flows.
 
-## Features
+It is organized as a pnpm workspace with a backend API, a web editor, and a shared runtime package.
 
-- **Visual Dataflow Editor**: Create complex data processing pipelines by connecting nodes in a visual interface
-- **15 Data Source Nodes**: Connect to various data sources including JSON, XML, CSV files, databases, APIs, and more
-- **20 Action Nodes**: Process and transform data with validators, mappers, filters, and perform actions like sending emails or uploading videos
-- **Property Editor**: Configure node properties through a user-friendly interface
-- **Flow Execution**: Execute, pause, resume, and stop dataflow networks
-- **Shared Runtime**: Backend and frontend share the same runtime library for consistent execution
+TransformerHub is designed as an AI-first platform and is HyperGraph-native and HyperAI-native by architecture.
+In the broader ecosystem, it plays the middleware and integration-layer role beside Kitchen and Quang.
 
-## Project Structure
+## Ecosystem Positioning
 
-```
+- AI-first orchestration: flows are designed to include AI reasoning, transformation, and automation as a core capability.
+- HyperGraph-native integration: flow contracts and runtime boundaries are aligned for interoperability with HyperGraph-driven systems.
+- HyperAI-native execution: node-level actions are designed to support AI-centric workloads across text, image, audio, and video pipelines.
+- Middleware role: TransformerHub mediates data movement, transformation, and control-plane handoff between ecosystem services.
+- Beside Kitchen and Quang: TransformerHub focuses on integration and runtime orchestration while adjacent platforms handle their domain responsibilities.
+
+## Declarative Node UI
+
+TransformerHub supports dynamic node configuration UI generated from declarative metadata.
+
+- Node type payloads can expose JSON Schema for node properties.
+- The web Property Editor renders form controls from schema definitions.
+- Legacy property definitions are still supported as a compatibility fallback.
+
+## Packages
+
+- `th-backend`: Express API service for flows and node metadata.
+- `th-web`: React + Vite frontend for visual flow editing.
+- `th-shared`: Shared flow runtime, node registry, and simulation utilities.
+
+## Monorepo Layout
+
+```text
 TransformerHub/
-├── backend/             # Node.js/Express backend
-│   ├── models/          # MongoDB models
-│   ├── routes/          # API routes
-│   ├── config.js        # Configuration
-│   ├── server.js        # Express server
-│   └── index.js         # Entry point
-├── frontend/            # React frontend
-│   ├── public/          # Static files
-│   └── src/             # Source code
-│       ├── components/  # React components
-│       ├── services/    # API services
-│       └── types/       # TypeScript definitions
-└── shared/              # Shared code between frontend and backend
-    ├── dataSourceNodes.js  # Data source node definitions
-    ├── actionNodes.js      # Action node definitions
-    └── runtime.js          # Shared runtime library
+├─ package.json
+├─ pnpm-workspace.yaml
+├─ docs/
+│  ├─ PLAN.md
+│  ├─ TODO.md
+│  ├─ HOWTO.md
+│  ├─ AI_GUIDELINE.md
+│  └─ progress/
+│     └─ v0.1.md
+├─ th-backend/
+├─ th-web/
+└─ th-shared/
 ```
 
-## Installation
+## Prerequisites
 
-### Prerequisites
+- Node.js 20+
+- pnpm 10+
 
-- Node.js (v14 or higher)
-- npm (v6 or higher)
-- MongoDB (optional, can use in-memory storage)
+## Quick Start
 
-### Setup
+1) Install all workspace dependencies from repo root:
 
-1. Clone the repository:
-```bash
-git clone https://github.com/atomixnmc/i2c-transformerhub.git
-cd i2c-transformerhub
-```
-
-2. Install dependencies:
-```bash
-# Install backend dependencies
-cd backend
-npm install
-
-# Install frontend dependencies
-cd ../frontend
-npm install
-```
-
-3. Configure environment variables (optional):
-Create a `.env` file in the backend directory with the following variables:
-```
-PORT=3001
-MONGODB_URI=mongodb://localhost:27017/transformerhub
-USE_MONGODB=true
-```
-
-## Running the Application
-
-1. Start the backend server:
-```bash
-cd backend
-npm start
-```
-
-2. Start the frontend development server:
-```bash
-cd frontend
-npm start
-```
-
-3. Open your browser and navigate to `http://localhost:3000`
-
-## Usage Guide
-
-### Creating a New Flow
-
-1. Navigate to the Editor page
-2. Drag data source nodes from the left sidebar onto the canvas
-3. Drag action nodes onto the canvas
-4. Connect nodes by dragging from output handles to input handles
-5. Configure node properties by clicking on a node and using the property editor
-6. Enter a name for your flow in the top control panel
-7. Click "Save" to save your flow
-8. Click "Execute" to run the flow
-
-### Available Node Types
-
-#### Data Source Nodes
-
-- **JSON File**: Load data from JSON files
-- **XML File**: Load data from XML files
-- **CSV File**: Load data from CSV files
-- **Video File**: Load video files for processing
-- **Audio File**: Load audio files for processing
-- **Image File**: Load image files for processing
-- **SQL Database**: Connect to SQL databases
-- **NoSQL Database**: Connect to NoSQL databases
-- **REST API**: Fetch data from REST APIs
-- **GraphQL API**: Fetch data from GraphQL APIs
-- **WebSocket**: Connect to WebSocket endpoints
-- **Form Data**: Process form submissions
-- **RSS Feed**: Load data from RSS feeds
-- **Email Source**: Process incoming emails
-- **IoT Device**: Connect to IoT devices
-
-#### Action Nodes
-
-- **JSON Validator**: Validate JSON data against schemas
-- **XML Transformer**: Transform XML data
-- **Data Filter**: Filter data based on conditions
-- **Data Mapper**: Map data from one structure to another
-- **Email Sender**: Send emails
-- **Video Transcoder**: Transcode video files
-- **YouTube Uploader**: Upload videos to YouTube
-- **Image Processor**: Process and transform images
-- **Text Analyzer**: Analyze text content
-- **Data Aggregator**: Aggregate data from multiple sources
-- **HTTP Request**: Make HTTP requests
-- **File Writer**: Write data to files
-- **Database Writer**: Write data to databases
-- **Data Joiner**: Join data from multiple sources
-- **Scheduler**: Schedule tasks
-- **Conditional Branch**: Create conditional logic
-- **Template Renderer**: Render templates with data
-- **Data Validator**: Validate data against rules
-- **Notification Sender**: Send notifications
-- **ML Predictor**: Make predictions using ML models
-
-## Development
-
-### Backend
-
-The backend is built with Node.js and Express, providing RESTful APIs for managing and executing flows. It uses MongoDB for persistence (with an in-memory fallback option).
-
-Key files:
-- `server.js`: Express server setup
-- `routes/flows.js`: Flow management endpoints
-- `routes/nodeTypes.js`: Node type information endpoints
-- `models/Flow.js`: MongoDB model for flows
-
-### Frontend
-
-The frontend is built with React and TypeScript, using React Flow for the visual dataflow editor.
-
-Key components:
-- `FlowEditor.tsx`: Main editor component
-- `CustomNode.tsx`: Visual representation of nodes
-- `PropertyEditor.tsx`: Interface for editing node properties
-
-### Shared Runtime
-
-The shared runtime library provides the execution engine for dataflow networks, used by both the frontend and backend.
-
-Key classes:
-- `Runtime`: Executes dataflow networks
-- `NodeFactory`: Creates node instances
-- `FlowManager`: Manages flow definitions
-
-Everytime to update the shared runtime, you need to run the following command in the root directory:
-```bash
-pnpm run build
-```
-After that, you need to run the following command in the backend directory:
 ```bash
 pnpm install
 ```
 
+2) Run backend and frontend in parallel:
+
+```bash
+pnpm dev
+```
+
+3) Build all packages:
+
+```bash
+pnpm build
+```
+
+## Useful Commands
+
+- Start all package dev servers: `pnpm dev`
+- Build all packages: `pnpm build`
+- Run all tests: `pnpm test`
+- Run a single package script:
+
+```bash
+pnpm --filter th-web dev
+pnpm --filter th-backend dev
+pnpm --filter th-shared build
+```
+
+## Environment Notes
+
+- `th-backend/.env` controls API port, storage mode, and database connection.
+- `th-web/.env` controls frontend runtime env values such as API base URL.
+
+## Documentation Index
+
+- Plan: `docs/PLAN.md`
+- Task backlog: `docs/TODO.md`
+- Developer guide: `docs/HOWTO.md`
+- AI contribution rules: `docs/AI_GUIDELINE.md`
+- Architecture: `docs/design/Architecture.md`
+- Node registry: `docs/design/nodes-registry.md`
+- Progress journal: `docs/progress/v0.1.md`
+
+## Current Status
+
+The repository now uses a root pnpm workspace with standardized root scripts for day-to-day development.
+
 ## Contributing
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+1) Create a branch from main.
+2) Make focused changes in one package at a time.
+3) Update relevant docs in `docs/`.
+4) Run build and tests before opening a PR.
 
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
-
-- Inspired by visual programming tools like Node-RED and Rete.js
-- Built with React, TypeScript, and Node.js

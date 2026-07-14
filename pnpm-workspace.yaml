@@ -1,0 +1,4 @@
+packages:
+  - th-backend
+  - th-shared
+  - th-web
